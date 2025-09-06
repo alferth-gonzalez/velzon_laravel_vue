@@ -17,7 +17,9 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 
 import store from "./state/store";
-import i18n from './i18n'
+import i18n from './i18n';
+import HttpPlugin from './plugins/http';
+// import { createPinia } from 'pinia'; // Descomenta cuando instales Pinia
 
 AOS.init({
     easing: 'ease-out-back',
@@ -34,6 +36,7 @@ createInertiaApp({
             .use(i18n)
             .use(ZiggyVue)
             .use(BootstrapVueNext)
+            .use(HttpPlugin)
             .component('Link', Link)
             .component('Head', Head)
             .use(VueApexCharts)

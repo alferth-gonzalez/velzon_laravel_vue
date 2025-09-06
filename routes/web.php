@@ -20,12 +20,34 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     
     Route::controller(ClientesController::class)->group(function () {
         Route::get('/clientes', 'index')->name('clientes.index');
+        Route::get('/clientes/edit/{id}', 'editar')->name('clientes.editar');
+        Route::get('/clientes/show/{id}', 'ver')->name('clientes.ver');
     });
 });
 
 
 
+// use App\Http\Controllers\VehiclesController;
+// use Illuminate\Support\Facades\Route;
 
+// Route::middleware(['web','auth']) // añade auth si aplica
+//   ->name('vehicles.')
+//   ->prefix('vehicles')
+//   ->group(function () {
+//     Route::get('/',                [VehiclesController::class,'index'])->name('index');
+//     Route::get('/create',          [VehiclesController::class,'create'])->name('create');
+//     Route::post('/',               [VehiclesController::class,'store'])->name('store');
+//     Route::get('/{vehicle}',       [VehiclesController::class,'show'])->name('show');
+//     Route::get('/{vehicle}/edit',  [VehiclesController::class,'edit'])->name('edit');
+//     Route::put('/{vehicle}',       [VehiclesController::class,'update'])->name('update');
+//     Route::delete('/{vehicle}',    [VehiclesController::class,'destroy'])->name('destroy');
+//     Route::post('/{vehicle}/restore', [VehiclesController::class,'restore'])->name('restore');
+// });
+
+// // Endpoint JSON para autocomplete de conductores
+// Route::get('/users/search', [VehiclesController::class, 'searchDrivers'])
+//   ->middleware(['web','auth'])
+//   ->name('users.search');
 
 
 
