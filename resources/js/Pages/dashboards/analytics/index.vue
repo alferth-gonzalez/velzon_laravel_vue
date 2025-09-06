@@ -40,7 +40,7 @@ export default {
       <BCol xxl="5">
         <BRow>
           <BCol cols="12">
-            <BCard no-body>
+            <div class="card" no-body>
               <BCardBody class="p-0">
                 <BAlert :model-value="true" variant="primary" class="border-0 rounded-0 m-0 d-flex align-items-center">
                   <AlertTriangleIcon class="text-primary me-2 icon-sm"></AlertTriangleIcon>
@@ -69,7 +69,7 @@ export default {
                   </BCol>
                 </BRow>
               </BCardBody>
-            </BCard>
+            </div>
           </BCol>
         </BRow>
         <Widget />

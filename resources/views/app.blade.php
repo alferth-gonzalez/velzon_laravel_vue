@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title inertia>Velzon - Inertia + Vue & Laravel Admin & Dashboard Template</title>
+    <title inertia>Skala</title>
     <meta name="description"
         content="Velzon is a feature-rich admin and dashboard template built with Inertia.js, Vue.js, and Laravel, designed to simplify web application development.">
     <meta name="keywords"

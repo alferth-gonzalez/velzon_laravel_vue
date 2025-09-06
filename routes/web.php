@@ -3,6 +3,7 @@
 use App\Http\Controllers\VelzonRoutesController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VehiclesController;
+use App\Http\Controllers\ClientesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -14,6 +15,34 @@ use App\Http\Controllers\VehiclesController;
 | contains the "web" middleware group. Now create something great!
 |
 */
+
+Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',])->group(function () {
+    
+    Route::controller(ClientesController::class)->group(function () {
+        Route::get('/clientes', 'index')->name('clientes.index');
+    });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',])->group(function () {
 
@@ -254,18 +283,4 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
         Route::get("/maps/google", "maps_google");
         Route::get("/maps/leaflet", "maps_leaflet");
     });
-});
-
-Route::middleware(['web','auth']) // añade auth si aplica
-    ->name('vehicles.')
-    ->prefix('vehicles')
-    ->group(function () {
-    Route::get('/',                [VehiclesController::class,'index'])->name('index');
-    Route::get('/create',          [VehiclesController::class,'create'])->name('create');
-    Route::post('/',               [VehiclesController::class,'store'])->name('store');
-    Route::get('/{vehicle}',       [VehiclesController::class,'show'])->name('show');
-    Route::get('/{vehicle}/edit',  [VehiclesController::class,'edit'])->name('edit');
-    Route::put('/{vehicle}',       [VehiclesController::class,'update'])->name('update');
-    Route::delete('/{vehicle}',    [VehiclesController::class,'destroy'])->name('destroy');
-    Route::post('/{vehicle}/restore', [VehiclesController::class,'restore'])->name('restore');
 });

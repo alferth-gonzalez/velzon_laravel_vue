@@ -352,6 +352,7 @@ export default {
 </script>
 
 <template>
+  <Head title="Calendar" />
   <Layout>
     <PageHeader title="Calendar" pageTitle="Apps" />
 
