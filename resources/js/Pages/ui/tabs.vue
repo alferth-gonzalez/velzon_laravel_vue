@@ -910,8 +910,8 @@ export default {
                         <BTabs nav-class="card-footer-tabs fs-17 text-muted" content-class="mb-3"
                             nav-wrapper-class="card-footer bg-transparent border-top pb-0" pills justified end>
                             <BTab>
-                                <template #title v-b-tooltip.hover="'Home'">
-                                    <i class="ri-home-3-line"></i>
+                                <template #title>
+                                    <i class="ri-home-3-line" v-b-tooltip.hover="'Home'"></i>
                                 </template>
                                 <h5><i class="ri-home-3-line align-bottom me-1"></i> Home</h5>
                                 <p class="mb-2">
@@ -926,8 +926,8 @@ export default {
                                 </p>
                             </BTab>
                             <BTab>
-                                <template #title v-b-tooltip.hover="'Profile'">
-                                    <i class="ri-user-2-line"></i>
+                                <template #title>
+                                    <i class="ri-user-2-line" v-b-tooltip.hover="'Profile'"></i>
                                 </template>
                                 <h5><i class="ri-user-2-line align-bottom me-1"></i> Profile</h5>
                                 <p class="mb-2">
@@ -942,8 +942,8 @@ export default {
                                 </p>
                             </BTab>
                             <BTab>
-                                <template #title v-b-tooltip.hover="'Messages'">
-                                    <i class="ri-mail-line"></i>
+                                <template #title>
+                                    <i class="ri-mail-line" v-b-tooltip.hover="'Messages'"></i>
                                 </template>
                                 <h5><i class="ri-mail-line align-bottom me-1"></i> Messages</h5>
                                 <p class="mb-2">

@@ -1,5 +1,5 @@
 const state = {
-  layoutType: 'semibox',
+  layoutType: 'vertical',
   layoutWidth: 'fluid',
   sidebarSize: 'lg',
   topbar: 'light',

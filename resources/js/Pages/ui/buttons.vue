@@ -1457,7 +1457,7 @@ Single toggle
                     <BButton variant="primary">2</BButton>
                     <b-btn-group class="btn-group" role="group">
                       <BDropdown variant="primary"  no-caret>
-                        <template #button-content class="btn btn-primary btn-md dropdown-toggle"> Dropdown </template>
+                        <template #button-content><span class="btn btn-primary btn-md dropdown-toggle">Dropdown</span></template>
                         <BDropdownItem href="#">Dropdown link</BDropdownItem>
                         <BDropdownItem href="#">Dropdown link</BDropdownItem>
                       </BDropdown>
