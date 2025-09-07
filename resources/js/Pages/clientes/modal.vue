@@ -1,105 +1,110 @@
 <script>
-
 export default {
-    data() {
-        return {
-          cliente: {},
-          loading: false,
-          error: null
-        };
-    },
-    props: {
-        idCliente: Number,
-        accion: String // crear, editar, ver
-    },
-    methods: {
-      async obtenerCliente() {
-        // Validar que tenemos un ID
-        if (!this.idCliente) {
-          this.error = 'ID de cliente no válido';
-          return;
-        }
+  emits: ['cerrarModal'],
+  data() {
+    return {
+      cliente: {},
+      loading: false,
+      error: null
+    };
+  },
+  props: {
+    idCliente: Number,
+    accion: String // crear, editar, ver
+  },
+  methods: {
+    async obtenerCliente() {
+      // Validar que tenemos un ID
+      if (!this.idCliente) {
+        this.error = 'ID de cliente no válido';
+        return;
+      }
 
-        this.loading = true;
-        this.error = null;
+      this.loading = true;
+      this.error = null;
 
-        try {
-          // Petición HTTP genérica - TU ENFOQUE PREFERIDO
-          const response = await this.$api.get(`/clientes/show/${this.idCliente}`);
-          
-          if (response.success) {
-            this.cliente = response.data;
-            console.log('Cliente cargado:', this.cliente);
-          } else {
-            this.error = response.message || 'Error al cargar cliente';
-            console.error('Error API:', response);
-          }
-        } catch (error) {
-          this.error = 'Error de conexión al cargar cliente';
-          console.error('Error de red:', error);
-        } finally {
-          this.loading = false;
-        }
-      },
-
-      mostrarErroresValidacion(errors) {
-        // Convertir errores de validación en mensaje legible
-        const mensajes = [];
-        Object.keys(errors).forEach(campo => {
-          errors[campo].forEach(mensaje => {
-            mensajes.push(`${campo}: ${mensaje}`);
-          });
-        });
-        this.error = mensajes.join(', ');
-      },
-
-      cerrarModal() {
-        // Cerrar modal usando Bootstrap
-        const modal = bootstrap.Modal.getInstance(document.getElementById('myModal'));
-        if (modal) {
-          modal.hide();
-        }
+      try {
+        // Petición HTTP genérica - TU ENFOQUE PREFERIDO
+        const response = await this.$api.get(`/clientes/show/${this.idCliente}`);
         
-        // Limpiar datos
-        this.cliente = {};
-        this.error = null;
+        if (response.success) {
+          this.cliente = response.data;
+        } else {
+          this.error = response.message || 'Error al cargar cliente';
+          console.error('Error API:', response);
+        }
+      } catch (error) {
+        this.error = 'Error de conexión al cargar cliente';
+        console.error('Error de red:', error);
+      } finally {
         this.loading = false;
-      },
-
-      limpiarFormulario() {
-        this.cliente = {
-          nombres: '',
-          apellidos: '',
-          email: '',
-          telefono: '',
-          direccion: ''
-        };
-        this.error = null;
       }
     },
-    mounted() {
-        if(this.accion === 'editar' || this.accion === 'ver') {
-          this.obtenerCliente();
-        }
+
+    abrirModal() {
+      
+      // Limpiar datos antes de mostrar
+      this.cliente = {};
+      this.error = null;
+      this.loading = false;
+      
+      // Usar método del mixin global
+      this.globalShowModal('myModal', {
+        backdrop: 'static',
+        keyboard: false
+      }, () => {
+        // Callback cuando se cierra el modal
+        this.$emit('cerrarModal');
+      });
+    },
+
+    cerrarModal() {
+      this.globalHideModal('myModal');
+    },
+
+    limpiarFormulario() {
+      this.cliente = {};
+      this.error = null;
+    },
+
+    async guardarCliente() {
+      // Implementar lógica de guardado aquí
+      console.log('Guardando cliente:', this.cliente);
+      // Después de guardar exitosamente, cerrar el modal
+      // this.cerrarModal();
+    },
+  },
+  mounted() {
+    // Mostrar el modal cuando el componente se monta
+    this.$nextTick(() => {
+      this.abrirModal();
+    });
+    
+    // Cargar datos si es editar o ver
+    if(this.accion === 'editar' || this.accion === 'ver') {
+      this.obtenerCliente();
     }
+  }
+  
+  // El mixin se encarga automáticamente de limpiar las instancias en beforeUnmount
 };
 </script>
 
 <template>
   <!-- Botón para abrir modal (solo ejemplo) -->
-  <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal">
+  <button type="button" class="btn btn-primary"  @click="abrirModal">
     {{ accion === 'crear' ? 'Nuevo Cliente' : accion === 'editar' ? 'Editar Cliente' : 'Ver Cliente' }}
   </button>
 
   <!-- Modal -->
-  <div id="myModal" class="modal fade" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div id="myModal" class="modal fade" tabindex="-1" aria-labelledby="myModalLabel" aria-hidden="true" style="display: none;">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
           <h5 class="modal-title" id="myModalLabel">
-            {{ accion === 'crear' ? 'Nuevo Cliente' : accion === 'editar' ? 'Editar Cliente' : 'Información del Cliente' }}
+            {{ accion === 'crear' ? 'Nuevo Cliente' : accion === 'editar' ? 'Editar Cliente' : 'Información Cliente' }}
           </h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close" @click="cerrarModal" aria-label="Close"></button>
         </div>
         
         <div class="modal-body">
@@ -206,7 +211,7 @@ export default {
         </div>
 
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <button type="button" class="btn btn-secondary" @click="cerrarModal">
             {{ accion === 'ver' ? 'Cerrar' : 'Cancelar' }}
           </button>
           

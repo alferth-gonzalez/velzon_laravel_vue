@@ -18,17 +18,21 @@ export default {
   },
   data() {
     return {
-      cliente: {},
-      clienteModal: false,
-      clienteModalTitle: 'Nuevo cliente',
-      clienteModalAction: 'Guardar'
+      modalCliente: {
+        accion: null, // crear, editar, ver
+        idCliente: null
+      },
+      showModal: false
     }
   },
 
   methods: {
     router,
-    editCliente(cliente) {
-      this.$inertia.visit(route('clientes.editar', cliente.id));
+    abrirModal(accion, idCliente = null) {
+      this.modalCliente.accion = accion;
+      this.modalCliente.idCliente = idCliente;
+
+      this.showModal = true;
     }
   }
 };
@@ -37,7 +41,7 @@ export default {
 <template>
   <Layout>
     <PageHeader :title="title" :pageTitle="breadcrumbs[0].name" />
-    <ClienteModal idCliente="2" accion="ver" />
+    <ClienteModal v-if="showModal" :idCliente="modalCliente.idCliente" :accion="modalCliente.accion" @cerrarModal="showModal = false" />
     <div class="row">
       <div class="col-lg-12">
         <div class="card" id="tasksList">
@@ -46,7 +50,7 @@ export default {
               <h5 class="card-title mb-0 flex-grow-1">Clientes</h5>
               <div class="flex-shrink-0">
                 <div class="d-flex flex-wrap gap-2">
-                  <button class="btn btn-danger add-btn" data-bs-toggle="modal" data-bs-target="#showModal"><i
+                  <button class="btn btn-danger add-btn" @click="abrirModal('crear', null)"><i
                       class="ri-add-line align-bottom me-1"></i> Nuevo</button>
                   <button class="btn btn-soft-danger" id="remove-actions"><i
                       class="ri-delete-bin-2-line"></i></button>
@@ -160,7 +164,7 @@ export default {
                     </td>
                     <td>
                       <span>
-                        <a :href="route('clientes.editar', cliente.id)" class="text-warning" @click="editCliente(cliente)">
+                        <a href="javascript:void(0);" class="text-warning" @click="abrirModal('editar', cliente.id)">
                           <i class="ri-pencil-line"></i>
                         </a>
                       </span>

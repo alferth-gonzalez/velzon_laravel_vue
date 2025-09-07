@@ -21,6 +21,8 @@ import i18n from './i18n';
 import HttpPlugin from './plugins/http';
 // import { createPinia } from 'pinia'; // Descomenta cuando instales Pinia
 
+import modalMixin from './common/mixins/modal';
+
 AOS.init({
     easing: 'ease-out-back',
     duration: 1000
@@ -43,6 +45,7 @@ createInertiaApp({
             .use(VueTheMask)
             .use(vClickOutside)
             .component(VueFeather.type, VueFeather)
+            .mixin(modalMixin)
             .mount(el);
     },
     progress: {
