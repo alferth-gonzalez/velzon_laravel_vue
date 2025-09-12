@@ -4,6 +4,7 @@ use App\Http\Controllers\VelzonRoutesController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VehiclesController;
 use App\Http\Controllers\ClientesController;
+use App\Modules\Customers\Infrastructure\Http\Controllers\CustomerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,6 +24,9 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
         Route::get('/clientes/edit/{id}', 'editar')->name('clientes.editar');
         Route::get('/clientes/show/{id}', 'ver')->name('clientes.ver');
     });
+
+    // Módulo Customers (prioridad alta)
+    Route::get('/customers', [CustomerController::class, 'indexView'])->name('customers.index');
 });
 
 
