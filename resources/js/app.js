@@ -17,7 +17,11 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 
 import store from "./state/store";
-import i18n from './i18n'
+import i18n from './i18n';
+import HttpPlugin from './plugins/http';
+// import { createPinia } from 'pinia'; // Descomenta cuando instales Pinia
+
+import modalMixin from './common/mixins/modal';
 
 AOS.init({
     easing: 'ease-out-back',
@@ -25,7 +29,7 @@ AOS.init({
 });
 
 createInertiaApp({
-    title: title => title ? `${title} | Velzon Inertia + Vue & Laravel Admin & Dashboard Template` : 'Velzon - Inertia + Vue & Laravel Admin & Dashboard Template',
+    title: title => title ? `${title} | Skala` : 'Skala',
     resolve: (name) => resolvePageComponent(`./Pages/${name}.vue`, import.meta.glob('./Pages/**/*.vue')),
     setup({ el, App, props, plugin }) {
         return createApp({ render: () => h(App, props) })
@@ -34,12 +38,14 @@ createInertiaApp({
             .use(i18n)
             .use(ZiggyVue)
             .use(BootstrapVueNext)
+            .use(HttpPlugin)
             .component('Link', Link)
             .component('Head', Head)
             .use(VueApexCharts)
             .use(VueTheMask)
             .use(vClickOutside)
             .component(VueFeather.type, VueFeather)
+            .mixin(modalMixin)
             .mount(el);
     },
     progress: {
