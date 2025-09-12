@@ -96,3 +96,4 @@ echo "  DELETE /api/customers/{id}      - Eliminar cliente"
 echo "  GET    /api/customers/search    - Buscar clientes"
 echo "  POST   /api/customers/merge     - Combinar clientes"
 echo ""
+

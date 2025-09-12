@@ -30,3 +30,4 @@ final readonly class CustomerUpdated
         ];
     }
 }
+

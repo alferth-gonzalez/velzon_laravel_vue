@@ -172,3 +172,4 @@ class SearchCustomersQuery
         return $patterns;
     }
 }
+

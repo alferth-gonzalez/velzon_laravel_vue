@@ -51,3 +51,4 @@ class CustomerTaxProfileModel extends Model
         return $query->where('is_self_retainer', true);
     }
 }
+

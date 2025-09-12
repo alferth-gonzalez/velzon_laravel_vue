@@ -31,3 +31,4 @@ return new class extends Migration
         Schema::dropIfExists('customer_processed_events');
     }
 };
+

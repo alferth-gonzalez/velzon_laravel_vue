@@ -76,3 +76,4 @@ class MergeCustomersCommand
         return $this->mergeService->previewMerge($sourceCustomer, $destinationCustomer);
     }
 }
+

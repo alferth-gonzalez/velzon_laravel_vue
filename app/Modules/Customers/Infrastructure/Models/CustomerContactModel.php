@@ -42,3 +42,4 @@ class CustomerContactModel extends Model
         return $query->where('role', $role);
     }
 }
+

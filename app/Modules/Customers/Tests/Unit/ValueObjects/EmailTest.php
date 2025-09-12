@@ -67,3 +67,4 @@ class EmailTest extends TestCase
         $this->assertEquals('test@example.com', (string) $email);
     }
 }
+

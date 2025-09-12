@@ -103,3 +103,4 @@ class DocumentIdTest extends TestCase
         $this->assertEquals('CC:12345678', (string) $documentId);
     }
 }
+

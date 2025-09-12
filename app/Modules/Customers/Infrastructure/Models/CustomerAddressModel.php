@@ -64,3 +64,4 @@ class CustomerAddressModel extends Model
         return $query->where('country_code', $countryCode);
     }
 }
+

@@ -26,3 +26,4 @@ interface CustomerReadModelInterface
     
     public function getCustomerTaxInfo(int $customerId): ?array;
 }
+

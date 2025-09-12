@@ -41,3 +41,4 @@ final readonly class CustomerFiltersDTO
         ], fn($value) => $value !== null);
     }
 }
+

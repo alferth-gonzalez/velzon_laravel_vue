@@ -105,3 +105,4 @@ class FakeComplianceGateway implements ComplianceGatewayInterface
         // - Datos específicos accedidos
     }
 }
+

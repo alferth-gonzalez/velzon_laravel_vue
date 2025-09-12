@@ -106,3 +106,4 @@ class CustomerModel extends Model
         });
     }
 }
+

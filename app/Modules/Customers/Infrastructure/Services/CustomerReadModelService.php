@@ -107,3 +107,4 @@ class CustomerReadModelService implements CustomerReadModelInterface
         ] : null;
     }
 }
+

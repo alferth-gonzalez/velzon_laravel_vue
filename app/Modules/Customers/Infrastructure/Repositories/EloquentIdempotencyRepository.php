@@ -53,3 +53,4 @@ class EloquentIdempotencyRepository implements IdempotencyRepositoryInterface
         return CustomerProcessedEventModel::expired()->delete();
     }
 }
+

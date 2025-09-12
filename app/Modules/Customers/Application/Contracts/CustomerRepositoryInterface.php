@@ -43,3 +43,4 @@ interface CustomerRepositoryInterface
     
     public function getMetrics(?string $tenantId, array $filters = []): array;
 }
+

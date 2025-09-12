@@ -18,3 +18,4 @@ interface ComplianceGatewayInterface
     
     public function auditDataAccess(int $customerId, int $userId, string $purpose): void;
 }
+

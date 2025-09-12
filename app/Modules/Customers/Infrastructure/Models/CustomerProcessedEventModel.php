@@ -46,3 +46,4 @@ class CustomerProcessedEventModel extends Model
         });
     }
 }
+

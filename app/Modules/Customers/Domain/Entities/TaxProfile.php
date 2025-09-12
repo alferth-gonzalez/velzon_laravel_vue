@@ -151,3 +151,4 @@ class TaxProfile
     public function getCreatedAt(): ?Carbon { return $this->createdAt; }
     public function getUpdatedAt(): ?Carbon { return $this->updatedAt; }
 }
+

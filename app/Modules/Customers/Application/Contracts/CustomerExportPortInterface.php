@@ -16,3 +16,4 @@ interface CustomerExportPortInterface
     
     public function getExportableData(array $customerIds, array $fields = []): array;
 }
+
