@@ -175,6 +175,7 @@ return [
          * Module Service Providers...
          */
         App\Modules\Customers\CustomersServiceProvider::class,
+        App\Modules\Employees\EmployeesServiceProvider::class,
     ])->toArray(),
 
     /*
