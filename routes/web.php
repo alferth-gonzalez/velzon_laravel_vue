@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VehiclesController;
 use App\Http\Controllers\ClientesController;
 use App\Modules\Customers\Infrastructure\Http\Controllers\CustomerController;
-
+use Inertia\Inertia;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -29,6 +29,18 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
     Route::get('/customers', [CustomerController::class, 'indexView'])->name('customers.index');
 });
 
+/**
+ * Inertia (MPA) pages — ejemplo Employees
+ */
+Route::get('/employees', fn () => Inertia::render('Employees/Index'))->name('employees.index');
+Route::get('/employees/create', fn () => Inertia::render('Employees/Create'))->name('employees.create');
+Route::get('/employees/{id}/edit', fn ($id) => Inertia::render('Employees/Edit', ['id' => $id]))->name('employees.edit');
+
+/**
+ * SPA (Vue Router) bajo /pos
+ * Sirve SIEMPRE la vista SPA y deja a Vue Router resolver los hijos.
+ */
+Route::view('/pos/{any?}', 'spa')->where('any', '.*');
 
 
 // use App\Http\Controllers\VehiclesController;

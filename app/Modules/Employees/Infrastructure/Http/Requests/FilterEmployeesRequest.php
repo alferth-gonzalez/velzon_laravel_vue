@@ -1,4 +1,8 @@
 <?php
+namespace App\Modules\Employees\Infrastructure\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+
 class FilterEmployeesRequest extends FormRequest {
   public function authorize(): bool { return true; }
   public function rules(): array {
