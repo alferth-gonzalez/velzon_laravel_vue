@@ -1,83 +1,111 @@
 <?php
-
+// EmployeeController.php
 namespace App\Modules\Employees\Infrastructure\Http\Controllers;
 
-use App\Modules\Employees\Domain\Services\EmployeeService;  // Inyección del servicio de dominio
-use Inertia\Inertia;
+use App\Http\Controllers\Controller;
+use App\Modules\Employees\Infrastructure\Http\Requests\{
+    CreateEmployeeRequest, UpdateEmployeeRequest, FilterEmployeesRequest
+};
+use App\Modules\Employees\Infrastructure\Http\Resources\{EmployeeResource};
+use App\Modules\Employees\Application\Commands\{
+    CreateEmployeeCommand, UpdateEmployeeCommand, DeleteEmployeeCommand
+};
+use App\Modules\Employees\Application\Handlers\{
+    CreateEmployeeHandler, UpdateEmployeeHandler, DeleteEmployeeHandler
+};
+use App\Modules\Employees\Application\Queries\{
+    GetEmployeeByIdQuery, ListEmployeesQuery
+};
+use App\Modules\Employees\Domain\Repositories\EmployeeRepositoryInterface;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
-class EmployeeController extends Controller
+final class EmployeeController extends Controller
 {
-    protected $employeeService;
+    public function index(
+        FilterEmployeesRequest $r,
+        EmployeeRepositoryInterface $repo
+    ) {
+        $filters = $r->validated();
+        $page    = (int)($filters['page'] ?? 1);
+        $perPage = (int)($filters['per_page'] ?? 15);
 
-    public function __construct(EmployeeService $employeeService)
-    {
-        $this->employeeService = $employeeService; // Inyección del servicio de dominio
-    }
-
-    // Obtener todos los empleados
-    public function index()
-    {  
-        $employees = $this->employeeService->getAllEmployees(); // Llama al servicio de dominio
-        dd($employees);
-        return Inertia::render('Employees/Index', [
-            'employees' => $employees,
+        $result = $repo->paginate($filters, $page, $perPage);
+        // Transformación rápida a array para no alargar
+        return response()->json([
+            'data' => array_map(fn($e) => [
+                'id' => $e->id(),
+                'first_name' => $e->firstName(),
+                'last_name' => $e->lastName(),
+                'document_type' => $e->document()->type(),
+                'document_number' => $e->document()->number(),
+                'email' => $e->email()?->value(),
+                'phone' => $e->phone()?->value(),
+                'hire_date' => $e->hireDate()?->format('Y-m-d'),
+                'status' => $e->status()->value,
+            ], $result['data']),
+            'meta' => ['total' => $result['total']]
         ]);
     }
 
-    // Crear un nuevo empleado
-    public function create()
-    {
-        return Inertia::render('Employees/Create');
-    }
-
-    // Editar un empleado
-    public function edit($id)
-    {
-        $employee = $this->employeeService->getEmployeeById($id);  // Llama al servicio de dominio
-        return Inertia::render('Employees/Edit', [
-            'employee' => $employee,
+    public function show(string $id, EmployeeRepositoryInterface $repo) {
+        $e = $repo->findById($id);
+        abort_unless($e, 404);
+        return response()->json([
+            'data' => [
+                'id' => $e->id(),
+                'tenant_id' => $e->tenantId(),
+                'first_name' => $e->firstName(),
+                'last_name' => $e->lastName(),
+                'document_type' => $e->document()->type(),
+                'document_number' => $e->document()->number(),
+                'email' => $e->email()?->value(),
+                'phone' => $e->phone()?->value(),
+                'hire_date' => $e->hireDate()?->format('Y-m-d'),
+                'status' => $e->status()->value,
+            ]
         ]);
     }
 
-    // Almacenar un nuevo empleado
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'document_type' => 'required|string',
-            'document_number' => 'required|string',
-            'email' => 'nullable|email',
-            'phone' => 'nullable|string',
-        ]);
-
-        $this->employeeService->createEmployee($validated);  // Llama al servicio de dominio
-
-        return redirect()->route('employees.index');
+    public function store(
+        CreateEmployeeRequest $r,
+        CreateEmployeeHandler $handler
+    ) {
+        $cmd = new CreateEmployeeCommand(
+            tenantId: $r->input('tenant_id'),
+            firstName: $r->input('first_name'),
+            lastName: $r->input('last_name'),
+            documentType: $r->input('document_type'),
+            documentNumber: $r->input('document_number'),
+            email: $r->input('email'),
+            phone: $r->input('phone'),
+            hireDate: $r->input('hire_date'),
+            actorId: Auth::id()?->toString() ?? null
+        );
+        $dto = $handler->handle($cmd);
+        return response()->json(['data' => $dto], 201);
     }
 
-    // Actualizar un empleado
-    public function update(Request $request, $id)
-    {
-        $validated = $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'document_type' => 'required|string',
-            'document_number' => 'required|string',
-            'email' => 'nullable|email',
-            'phone' => 'nullable|string',
-        ]);
-
-        $this->employeeService->updateEmployee($id, $validated);  // Llama al servicio de dominio
-
-        return redirect()->route('employees.index');
+    public function update(
+        string $id,
+        UpdateEmployeeRequest $r,
+        UpdateEmployeeHandler $handler
+    ) {
+        $cmd = new UpdateEmployeeCommand(
+            id: $id,
+            firstName: $r->input('first_name'),
+            lastName: $r->input('last_name'),
+            email: $r->input('email'),
+            phone: $r->input('phone'),
+            hireDate: $r->input('hire_date'),
+            actorId: Auth::id()?->toString() ?? null
+        );
+        $dto = $handler->handle($cmd);
+        return response()->json(['data' => $dto]);
     }
 
-    // Eliminar un empleado
-    public function destroy($id)
-    {
-        $this->employeeService->deleteEmployee($id);  // Llama al servicio de dominio
-        return redirect()->route('employees.index');
+    public function destroy(string $id, DeleteEmployeeHandler $handler) {
+        $handler->handle(new DeleteEmployeeCommand($id));
+        return response()->noContent();
     }
 }

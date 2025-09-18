@@ -12,3 +12,4 @@ Route::middleware('api')->prefix('api')->group(function () {
         Route::delete('/{id}', [EmployeeController::class, 'destroy']);
     });
 });
+// TEMPORAL: Auth middleware removido para testing - agregar de vuelta: ->middleware(['auth:sanctum'])

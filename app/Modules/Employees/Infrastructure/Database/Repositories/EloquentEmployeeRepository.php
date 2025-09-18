@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 namespace App\Modules\Employees\Infrastructure\Database\Repositories;
 
-use App\Modules\Employees\Domain\Repositories\EmployeeRepository;
+use App\Modules\Employees\Domain\Repositories\EmployeeRepositoryInterface;
 use App\Modules\Employees\Domain\Entities\Employee;
 use App\Modules\Employees\Domain\ValueObjects\{DocumentId, Email, Phone, EmployeeStatus};
 use App\Modules\Employees\Infrastructure\Database\Models\EmployeeModel;
 
-final class EloquentEmployeeRepository implements EmployeeRepository
+final class EloquentEmployeeRepository implements EmployeeRepositoryInterface
 {
     public function findById(string $id): ?Employee {
         $m = EmployeeModel::find($id);

@@ -32,7 +32,33 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified',
 /**
  * Inertia (MPA) pages — ejemplo Employees
  */
-Route::get('/employees', fn () => Inertia::render('Employees/Index'))->name('employees.index');
+Route::get('/employees', function() {
+    // Obtener datos reales desde el repositorio
+    $repo = app(\App\Modules\Employees\Domain\Repositories\EmployeeRepositoryInterface::class);
+    $result = $repo->paginate([], 1, 15);
+    
+    // Transformar datos para el frontend
+    $employees = [
+        'data' => array_map(fn($e) => [
+            'id' => $e->id(),
+            'first_name' => $e->firstName(),
+            'last_name' => $e->lastName(),
+            'document_type' => $e->document()->type(),
+            'document_number' => $e->document()->number(),
+            'email' => $e->email()?->value(),
+            'phone' => $e->phone()?->value(),
+            'hire_date' => $e->hireDate()?->format('Y-m-d'),
+            'status' => $e->status()->value,
+        ], $result['data']),
+        'meta' => ['total' => $result['total']]
+    ];
+    
+    return Inertia::render('Employees/Index', [
+        'employees' => $employees
+    ]);
+})->name('employees.index');
+// TEMPORAL: middleware removido para testing - agregar de vuelta: ->middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']);
+
 Route::get('/employees/create', fn () => Inertia::render('Employees/Create'))->name('employees.create');
 Route::get('/employees/{id}/edit', fn ($id) => Inertia::render('Employees/Edit', ['id' => $id]))->name('employees.edit');
 
