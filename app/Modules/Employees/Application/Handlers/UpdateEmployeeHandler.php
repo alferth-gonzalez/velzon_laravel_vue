@@ -4,12 +4,12 @@ namespace App\Modules\Employees\Application\Handlers;
 
 use App\Modules\Employees\Application\Commands\UpdateEmployeeCommand;
 use App\Modules\Employees\Application\DTOs\EmployeeDTO;
-use App\Modules\Employees\Domain\Repositories\EmployeeRepository;
+use App\Modules\Employees\Domain\Repositories\EmployeeRepositoryInterface;
 use App\Modules\Employees\Domain\ValueObjects\{Email, Phone};
 use App\Modules\Employees\Domain\Exceptions\EmployeeNotFoundException;
 
 final class UpdateEmployeeHandler {
-    public function __construct(private EmployeeRepository $repo) {}
+    public function __construct(private EmployeeRepositoryInterface $repo) {}
 
     public function handle(UpdateEmployeeCommand $c): EmployeeDTO {
         $e = $this->repo->findById($c->id);
@@ -19,7 +19,7 @@ final class UpdateEmployeeHandler {
             firstName: $c->firstName,
             lastName: $c->lastName,
             email: $c->email ? new Email($c->email) : null,
-            phone: $c->phone ? new Phone($c->phone) : null,
+            phone: $c->phone ? Phone::fromString($c->phone) : null,
             hireDate: $c->hireDate ? new \DateTimeImmutable($c->hireDate) : null,
             updatedBy: $c->actorId
         );

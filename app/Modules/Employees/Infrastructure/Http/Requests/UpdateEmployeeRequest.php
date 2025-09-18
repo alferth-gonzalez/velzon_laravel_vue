@@ -9,7 +9,7 @@ class UpdateEmployeeRequest extends FormRequest {
       return [
           'first_name' => ['required','string','max:80'],
           'last_name'  => ['nullable','string','max:80'],
-          'email'      => ['nullable','email:rfc,dns','max:150'],
+          'email'      => ['nullable','email','max:150'],
           'phone'      => ['nullable','string','max:30'],
           'hire_date'  => ['nullable','date'],
       ];

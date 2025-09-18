@@ -25,7 +25,10 @@ final class EloquentEmployeeRepository implements EmployeeRepositoryInterface
     }
 
     public function save(Employee $e): void {
-        $m = EmployeeModel::find($e->id()) ?? new EmployeeModel(['id' => $e->id()]);
+        $m = EmployeeModel::find($e->id());
+        if (!$m) {
+            $m = new EmployeeModel();
+        }
         $m->tenant_id       = $e->tenantId();
         $m->first_name      = $e->firstName();
         $m->last_name       = $e->lastName();

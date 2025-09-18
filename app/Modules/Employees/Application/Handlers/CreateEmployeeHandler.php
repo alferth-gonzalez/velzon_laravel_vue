@@ -4,12 +4,12 @@ namespace App\Modules\Employees\Application\Handlers;
 
 use App\Modules\Employees\Application\Commands\CreateEmployeeCommand;
 use App\Modules\Employees\Application\DTOs\EmployeeDTO;
-use App\Modules\Employees\Domain\Repositories\EmployeeRepository;
+use App\Modules\Employees\Domain\Repositories\EmployeeRepositoryInterface;
 use App\Modules\Employees\Domain\Entities\Employee;
 use App\Modules\Employees\Domain\ValueObjects\{DocumentId, Email, Phone};
 
 final class CreateEmployeeHandler {
-    public function __construct(private EmployeeRepository $repo) {}
+    public function __construct(private EmployeeRepositoryInterface $repo) {}
 
     public function handle(CreateEmployeeCommand $c): EmployeeDTO {
         // Verificar duplicado por documento (por tenant si aplica)
@@ -26,7 +26,7 @@ final class CreateEmployeeHandler {
             lastName: $c->lastName,
             document: $doc,
             email: $c->email ? new Email($c->email) : null,
-            phone: $c->phone ? new Phone($c->phone) : null,
+            phone: $c->phone ? Phone::fromString($c->phone) : null,
             hireDate: $c->hireDate ? new \DateTimeImmutable($c->hireDate) : null,
             createdBy: $c->actorId
         );

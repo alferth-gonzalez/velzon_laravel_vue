@@ -12,7 +12,7 @@ class CreateEmployeeRequest extends FormRequest {
             'last_name'      => ['nullable','string','max:80'],
             'document_type'  => ['required','in:CC,NIT,CE,PA,TI,RC'],
             'document_number'=> ['required','string','max:32'],
-            'email'          => ['nullable','email:rfc,dns','max:150'],
+            'email'          => ['nullable','email','max:150'],
             'phone'          => ['nullable','string','max:30'],
             'hire_date'      => ['nullable','date'],
         ];
