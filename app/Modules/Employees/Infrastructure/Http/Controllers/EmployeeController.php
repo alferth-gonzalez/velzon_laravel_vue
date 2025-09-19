@@ -17,6 +17,7 @@ use App\Modules\Employees\Application\Queries\{
     GetEmployeeByIdQuery, ListEmployeesQuery
 };
 use App\Modules\Employees\Domain\Repositories\EmployeeRepositoryInterface;
+use App\Modules\Employees\Domain\Services\EmployeeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -107,5 +108,15 @@ final class EmployeeController extends Controller
     public function destroy(string $id, DeleteEmployeeHandler $handler) {
         $handler->handle(new DeleteEmployeeCommand($id));
         return response()->noContent();
+    }
+
+    // Función específica: Inactivar empleados González
+    public function inactivateGonzalezEmployees(EmployeeService $employeeService) {
+        $results = $employeeService->inactivateGonzalezEmployees();
+        
+        return response()->json([
+            'message' => "Se inactivaron {$results['inactivated']} empleados González de {$results['total_found']} encontrados",
+            'data' => $results
+        ]);
     }
 }

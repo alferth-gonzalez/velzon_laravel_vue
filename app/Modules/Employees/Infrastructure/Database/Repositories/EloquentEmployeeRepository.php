@@ -24,6 +24,15 @@ final class EloquentEmployeeRepository implements EmployeeRepositoryInterface
         return $m ? $this->toDomain($m) : null;
     }
 
+    public function findByLastName(string $lastName): array {
+        $rows = EmployeeModel::query()
+            ->where('last_name', 'like', "%$lastName%")
+            ->whereNull('deleted_at')
+            ->get();
+            
+        return array_map(fn($m) => $this->toDomain($m), $rows->all());
+    }
+
     public function save(Employee $e): void {
         $m = EmployeeModel::find($e->id());
         if (!$m) {

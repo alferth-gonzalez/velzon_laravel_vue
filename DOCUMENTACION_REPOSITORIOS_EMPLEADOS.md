@@ -221,6 +221,62 @@ private function toDomain($data): Employee {
 }
 ```
 
+#### **4. Traer datos completos de la tabla**
+```php
+// ✅ BIEN - Trae todos los campos necesarios
+public function findById(string $id): ?Employee {
+    $data = DB::table('employees')
+        ->select('*')  // ← Todos los campos
+        ->where('id', $id)
+        ->first();
+        
+    return $data ? $this->toDomain($data) : null;
+}
+
+// ❌ MAL - Faltan campos necesarios
+public function findById(string $id): ?Employee {
+    $data = DB::table('employees')
+        ->select('id', 'first_name', 'last_name')  // ❌ Faltan campos
+        ->where('id', $id)
+        ->first();
+        
+    return $data ? $this->toDomain($data) : null;  // ❌ Error: faltan campos
+}
+```
+
+#### **5. Usar map para múltiples objetos**
+```php
+// ✅ BIEN - Para múltiples empleados usa array_map
+public function paginate(array $filters, int $page, int $perPage): array {
+    $rows = $q->forPage($page, $perPage)->get();
+    
+    return [
+        'data' => array_map(fn($row) => $this->toDomain($row), $rows->all()),
+        'total' => $total,
+    ];
+}
+
+public function findByTenant(string $tenantId): array {
+    $rows = DB::table('employees')
+        ->where('tenant_id', $tenantId)
+        ->whereNull('deleted_at')
+        ->get();
+    
+    // Convertir cada fila a Employee
+    return array_map(fn($row) => $this->toDomain($row), $rows->all());
+}
+
+// ❌ MAL - toDomain no funciona con arrays
+public function paginate(array $filters, int $page, int $perPage): array {
+    $rows = $q->forPage($page, $perPage)->get();
+    
+    return [
+        'data' => $this->toDomain($rows), // ❌ Error: toDomain espera un objeto, no un array
+        'total' => $total,
+    ];
+}
+```
+
 ### ❌ **Lo que NO debes hacer:**
 
 #### **1. No pongas lógica de negocio en el Repository**
@@ -251,6 +307,89 @@ public function findById(string $id): ?object {
 - ❌ Cálculos complejos
 - ❌ Lógica de autorización
 - ❌ Transformaciones de presentación
+
+---
+
+## 🔄 Entendiendo `toDomain()`
+
+### **¿Qué es `toDomain()`?**
+
+`toDomain()` es el método que **convierte** los datos simples de la base de datos en un objeto `Employee` con todas sus reglas de negocio.
+
+### **Diferencia entre datos "raw" y objetos de dominio:**
+
+#### **Datos "Raw" (de la base de datos):**
+```php
+// Esto es lo que devuelve la base de datos:
+$data = DB::table('employees')->where('id', $id)->first();
+
+// $data es un objeto genérico con propiedades simples:
+// $data->id = "123"
+// $data->first_name = "Juan"
+// $data->last_name = "Pérez"
+// $data->email = "juan@email.com"
+// $data->status = "active"
+```
+
+#### **Objeto de Dominio (Employee):**
+```php
+// Esto es lo que devuelve toDomain():
+$employee = new Employee(
+    id: "123",
+    firstName: "Juan",
+    lastName: "Pérez",
+    email: new Email("juan@email.com"),  // ← Value Object
+    status: EmployeeStatus::ACTIVE,       // ← Enum
+    document: new DocumentId("CC", "12345678")  // ← Value Object
+);
+```
+
+### **¿Por qué es importante esta conversión?**
+
+#### **Sin conversión (malo):**
+```php
+// En el controlador tendrías que hacer:
+public function show($id) {
+    $data = $this->employeeRepository->findById($id);
+    
+    // ❌ Acceso inconsistente a los datos
+    $nombre = $data->first_name;  // snake_case
+    $email = $data->email;        // Sin validación
+    $status = $data->status;      // String simple
+    
+    return response()->json([
+        'nombre' => $nombre,
+        'email' => $email,
+        'status' => $status
+    ]);
+}
+```
+
+#### **Con conversión (bueno):**
+```php
+// En el controlador:
+public function show($id) {
+    $employee = $this->employeeRepository->findById($id);
+    
+    // ✅ Acceso consistente y con validaciones
+    $nombre = $employee->firstName();     // camelCase
+    $email = $employee->email()?->value(); // Con validación
+    $status = $employee->status()->value;  // Enum validado
+    
+    return response()->json([
+        'nombre' => $nombre,
+        'email' => $email,
+        'status' => $status
+    ]);
+}
+```
+
+### **Reglas importantes para `toDomain()`:**
+
+1. **Solo funciona con un objeto a la vez** - No con arrays
+2. **Necesita todos los campos** - La consulta debe traer todos los datos
+3. **Siempre devuelve un objeto Employee** - Con todas sus reglas de negocio
+4. **Para múltiples objetos** - Usa `array_map()` o `collect()->map()`
 
 ---
 
@@ -399,6 +538,152 @@ class FakeEmployeeRepository implements EmployeeRepositoryInterface {
 - Cambios de consultas en un solo lugar
 - Fácil agregar nuevos métodos
 - Código más organizado y limpio
+
+---
+
+## 🏗️ Organización para Módulos Grandes
+
+### **¿Qué hacer cuando el módulo es muy grande?**
+
+Para módulos grandes (como nómina, contabilidad, etc.) que abarcan muchos procesos y requieren muchas consultas, **NO** debes tener todas las consultas en un solo archivo Repository.
+
+### **Opción 1: Repositories Especializados (Recomendado)**
+
+```
+app/Modules/Payroll/
+├── Domain/
+│   └── Repositories/
+│       ├── PayrollRepositoryInterface.php
+│       ├── EmployeePayrollRepositoryInterface.php
+│       ├── DeductionRepositoryInterface.php
+│       ├── PaymentRepositoryInterface.php
+│       └── ReportRepositoryInterface.php
+└── Infrastructure/
+    └── Database/
+        └── Repositories/
+            ├── EloquentPayrollRepository.php
+            ├── EloquentEmployeePayrollRepository.php
+            ├── EloquentDeductionRepository.php
+            ├── EloquentPaymentRepository.php
+            └── EloquentReportRepository.php
+```
+
+### **Criterios para Organizar Repositories:**
+
+#### **Por Entidad de Negocio:**
+```
+PayrollRepository          → Nóminas
+EmployeePayrollRepository  → Empleados en nómina
+DeductionRepository        → Deducciones
+PaymentRepository          → Pagos
+TaxRepository             → Impuestos
+```
+
+#### **Por Funcionalidad:**
+```
+PayrollRepository     → CRUD básico
+CalculationRepository → Cálculos y fórmulas
+ReportRepository      → Reportes y consultas complejas
+ExportRepository      → Exportación de datos
+```
+
+### **Ejemplo Práctico - Módulo de Nómina:**
+
+#### **1. Repository de Nómina Principal:**
+```php
+// PayrollRepositoryInterface.php
+interface PayrollRepositoryInterface
+{
+    // CRUD básico
+    public function findById(string $id): ?Payroll;
+    public function save(Payroll $payroll): void;
+    public function delete(string $id): void;
+    
+    // Búsquedas
+    public function findByPeriod(string $period): array;
+    public function findByEmployee(string $employeeId): array;
+    public function findByStatus(string $status): array;
+    
+    // Consultas específicas
+    public function findPendingPayrolls(): array;
+    public function findApprovedPayrolls(string $period): array;
+}
+```
+
+#### **2. Repository de Deducciones:**
+```php
+// DeductionRepositoryInterface.php
+interface DeductionRepositoryInterface
+{
+    public function findByPayroll(string $payrollId): array;
+    public function findByType(string $type): array;
+    public function calculateTotalDeductions(string $payrollId): float;
+    public function save(Deduction $deduction): void;
+    public function delete(string $id): void;
+}
+```
+
+#### **3. Repository de Reportes:**
+```php
+// ReportRepositoryInterface.php
+interface ReportRepositoryInterface
+{
+    public function getPayrollSummary(string $period): array;
+    public function getEmployeeEarnings(string $employeeId, string $period): array;
+    public function getTaxReport(string $period): array;
+    public function getDeductionReport(string $period): array;
+    public function getPayrollHistory(string $employeeId): array;
+}
+```
+
+### **Uso en Services:**
+
+```php
+class PayrollService
+{
+    public function __construct(
+        private PayrollRepositoryInterface $payrollRepository,
+        private DeductionRepositoryInterface $deductionRepository,
+        private PaymentRepositoryInterface $paymentRepository
+    ) {}
+
+    public function createPayroll(array $data): Payroll {
+        $payroll = new Payroll(/* ... */);
+        $this->payrollRepository->save($payroll);
+        
+        // Crear deducciones
+        foreach ($data['deductions'] as $deductionData) {
+            $deduction = new Deduction(/* ... */);
+            $this->deductionRepository->save($deduction);
+        }
+        
+        return $payroll;
+    }
+}
+```
+
+### **Service Provider para Múltiples Repositories:**
+
+```php
+class PayrollServiceProvider extends ServiceProvider
+{
+    public function register(): void
+    {
+        $this->app->bind(PayrollRepositoryInterface::class, EloquentPayrollRepository::class);
+        $this->app->bind(DeductionRepositoryInterface::class, EloquentDeductionRepository::class);
+        $this->app->bind(PaymentRepositoryInterface::class, EloquentPaymentRepository::class);
+        $this->app->bind(ReportRepositoryInterface::class, EloquentReportRepository::class);
+    }
+}
+```
+
+### **Recomendaciones para Módulos Grandes:**
+
+1. **Tamaño del Repository**: Máximo 15-20 métodos por Repository
+2. **Naming Convention**: Usa nombres descriptivos por entidad o funcionalidad
+3. **División**: Si un Repository tiene más de 20 métodos, divídelo
+4. **Consistencia**: Mantén el mismo patrón en todos los Repositories
+5. **Documentación**: Documenta cada Repository con su propósito
 
 ---
 
